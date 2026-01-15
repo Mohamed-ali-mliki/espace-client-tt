@@ -1,0 +1,89 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Section gauche : Logo et nom de l'application -->
+    <div class="navbar-left">
+      <div class="navbar-logo"> 
+        <!-- Logo Tunisie Telecom avec versionnage pour éviter le cache -->
+        <img 
+          src="https://upload.wikimedia.org/wikipedia/en/9/99/Tunisie_Telecom_Logo.png?v=3" 
+          alt="Logo Tunisie Telecom" 
+          class="logo-img"
+          (load)="onImageLoad()"
+          (error)="onImageError($event)"
+        />
+      </div>
+      <div class="navbar-brand">
+        <span class="brand-text">Espace Client</span>
+      </div>
+    </div>
+
+    <!-- Section droite : Menu de navigation -->
+    <div class="navbar-right">
+      <div class="nav-links">
+        <!-- Lien vers la page d'accueil -->
+        <a 
+          routerLink="/home" 
+          routerLinkActive="active" 
+          [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link"
+        >
+          Home
+        </a>
+        
+        <!-- Lien vers la page de connexion -->
+        <a 
+          routerLink="/login" 
+          routerLinkActive="active" 
+          class="nav-link"
+        >
+          Login
+        </a>
+        
+        <!-- Lien vers la page d'inscription -->
+        <a 
+          routerLink="/inscription" 
+          routerLinkActive="active" 
+          class="nav-link"
+        >
+          Inscription
+        </a>
+        
+        <!-- Lien vers le tableau de bord client -->
+        <a 
+          routerLink="/dashboard-client" 
+          routerLinkActive="active" 
+          class="nav-link"
+        >
+          Dashboard Client
+        </a>
+        
+        <!-- Lien vers le tableau de bord administrateur -->
+        <a 
+          routerLink="/dashboard-admin" 
+          routerLinkActive="active" 
+          class="nav-link"
+        >
+          Dashboard Admin
+        </a>
+        
+        <!-- Lien vers la page des abonnements -->
+        <a 
+          routerLink="/subscriptions" 
+          routerLinkActive="active" 
+          class="nav-link"
+        >
+          Subscriptions
+        </a>
+        
+        <!-- Lien vers la page des demandes -->
+        <a 
+          routerLink="/requests" 
+          routerLinkActive="active" 
+          class="nav-link"
+        >
+          Requests
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
