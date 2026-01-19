@@ -1,1 +1,75 @@
-<p>login works!</p>
+<!-- Formulaire de connexion seulement - navbar supprimée -->
+<div class="login-page">
+  <div class="login-container">
+    <!-- Titre du formulaire -->
+    <div class="login-header">
+      <h1>Login</h1>
+      <p>Accédez à votre espace personnel</p>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div class="error-message" *ngIf="errorMessage">
+      <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+    </div>
+
+    <!-- Message de succès -->
+    <div class="success-message" *ngIf="successMessage">
+      <i class="fas fa-check-circle"></i> {{ successMessage }}
+    </div>
+
+    <!-- Formulaire de connexion -->
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Champ email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <div class="input-with-icon">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="email" class="form-control" formControlName="email" placeholder="votre@email.com" required>
+        </div>
+        <div class="validation-error" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          <small>Veuillez entrer un email valide</small>
+        </div>
+      </div>
+
+      <!-- Champ mot de passe -->
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <div class="input-with-icon">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="password" class="form-control" formControlName="password" placeholder="Votre mot de passe" required>
+        </div>
+        <div class="validation-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          <small>Le mot de passe est requis</small>
+        </div>
+      </div>
+
+      <!-- Options supplémentaires -->
+      <div class="form-options">
+        <div class="remember-me">
+          <input type="checkbox" id="remember">
+          <label for="remember">Remember Me</label>
+        </div>
+        <a routerLink="/forgot-password" class="forgot-password">Forget Password?</a>
+      </div>
+
+      <!-- Boutons -->
+      <div class="btn-container">
+        <button type="submit" class="btn-login" [disabled]="loginForm.invalid || isLoading">
+          <span *ngIf="!isLoading">Submit</span>
+          <span *ngIf="isLoading">Connexion en cours...</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Liens supplémentaires -->
+    <div class="login-footer">
+      <p>Don't have an account? <a routerLink="/register">Register</a></p>
+    </div>
+
+    <!-- Logo Tunisie Telecom discret -->
+    <div class="bottom-logo">
+      <i class="fas fa-satellite-dish"></i>
+      <span>Tunisie Telecom</span>
+    </div>
+  </div>
+</div>
