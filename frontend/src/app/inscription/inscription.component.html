@@ -1,1 +1,67 @@
-<p>inscription works!</p>
+<div class="inscription-page">
+  <div class="inscription-container">
+    <div class="inscription-header">
+      <h1>Inscription</h1>
+      <p>Créez votre compte client</p>
+    </div>
+
+    <form class="inscription-form" [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
+      
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <div class="input-with-icon">
+          <i class="fas fa-user"></i>
+          <input type="text" id="nom" class="form-control" formControlName="nom" placeholder="Votre nom" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <div class="input-with-icon">
+          <i class="fas fa-user"></i>
+          <input type="text" id="prenom" class="form-control" formControlName="prenom" placeholder="Votre prénom" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <div class="input-with-icon">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="email" class="form-control" formControlName="email" placeholder="votre@email.com" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="telephone">Numéro de téléphone</label>
+        <div class="input-with-icon">
+          <i class="fas fa-phone"></i>
+          <input type="text" id="telephone" class="form-control" formControlName="telephone" placeholder="+216 99 999 999" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <div class="input-with-icon">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="password" class="form-control" formControlName="password" placeholder="Votre mot de passe" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer le mot de passe</label>
+        <div class="input-with-icon">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="confirmPassword" class="form-control" formControlName="confirmPassword" placeholder="Confirmer le mot de passe" required>
+        </div>
+      </div>
+
+      <div class="btn-container">
+        <button type="submit" class="btn-submit" [disabled]="inscriptionForm.invalid || isLoading">
+          <span *ngIf="!isLoading">Créer un compte</span>
+          <span *ngIf="isLoading">Création en cours...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
