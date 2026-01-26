@@ -1,1 +1,548 @@
-<p>requests works!</p>
+<div class="requests-page">
+  <div class="requests-container">
+    
+    <!-- En-tête de page -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1> 
+          <i class="fas fa-tasks"></i>
+          Gestion des Demandes
+        </h1>
+        <p class="page-description">
+          Suivez et gérez toutes vos demandes auprès de Tunisie Telecom
+        </p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-new-request" (click)="showForm = !showForm">
+          <i class="fas fa-plus"></i>
+          Nouvelle Demande
+        </button>
+        @if (isAdmin) {
+          <button class="btn-export" (click)="exporterDemandes('csv')">
+            <i class="fas fa-download"></i>
+            Exporter
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Cartes de statistiques -->
+    <div class="stats-cards">
+      <div class="stat-card total">
+        <div class="stat-icon">
+          <i class="fas fa-inbox"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistiques.total }}</div>
+          <div class="stat-label">Demandes totales</div>
+        </div>
+      </div>
+      
+      <div class="stat-card pending">
+        <div class="stat-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistiques.enAttente }}</div>
+          <div class="stat-label">En attente</div>
+        </div>
+      </div>
+      
+      <div class="stat-card in-progress">
+        <div class="stat-icon">
+          <i class="fas fa-spinner"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistiques.enCours }}</div>
+          <div class="stat-label">En cours</div>
+        </div>
+      </div>
+      
+      <div class="stat-card resolved">
+        <div class="stat-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistiques.resolues }}</div>
+          <div class="stat-label">Résolues</div>
+        </div>
+      </div>
+      
+      <div class="stat-card rate">
+        <div class="stat-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ statistiques.tauxResolution }}%</div>
+          <div class="stat-label">Taux de résolution</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire de nouvelle demande -->
+    @if (showForm) {
+      <div class="form-container">
+        <div class="form-header">
+          <h3><i class="fas fa-file-alt"></i> Nouvelle Demande</h3>
+          <button class="btn-close-form" (click)="showForm = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <form [formGroup]="demandeForm" (ngSubmit)="soumettreDemande()" class="request-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="type">
+                <i class="fas fa-tag"></i> Type de demande *
+              </label>
+              <select 
+                id="type" 
+                formControlName="type" 
+                class="form-control"
+                [class.is-invalid]="demandeForm.get('type')?.invalid && demandeForm.get('type')?.touched">
+                <option value="">Sélectionnez un type</option>
+                @for (type of typesDemande; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
+              </select>
+              @if (demandeForm.get('type')?.invalid && demandeForm.get('type')?.touched) {
+                <div class="invalid-feedback">
+                  Le type de demande est requis
+                </div>
+              }
+            </div>
+            
+            <div class="form-group">
+              <label for="priorite">
+                <i class="fas fa-exclamation-circle"></i> Priorité
+              </label>
+              <select 
+                id="priorite" 
+                formControlName="priorite" 
+                class="form-control">
+                @for (priorite of prioritesDemande; track priorite) {
+                  <option [value]="priorite">{{ priorite }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="titre">
+              <i class="fas fa-heading"></i> Titre *
+            </label>
+            <input 
+              type="text" 
+              id="titre" 
+              formControlName="titre" 
+              class="form-control"
+              placeholder="Ex: Souscription Fibre 100 Mbps"
+              [class.is-invalid]="demandeForm.get('titre')?.invalid && demandeForm.get('titre')?.touched">
+            @if (demandeForm.get('titre')?.invalid && demandeForm.get('titre')?.touched) {
+              <div class="invalid-feedback">
+                @if (demandeForm.get('titre')?.errors?.['required']) {
+                  Le titre est requis
+                }
+                @if (demandeForm.get('titre')?.errors?.['minlength']) {
+                  Minimum 5 caractères
+                }
+              </div>
+            }
+          </div>
+          
+          <!-- Champ sélection abonnement -->
+          @if (demandeForm.get('type')?.value === 'MODIFICATION' || 
+                demandeForm.get('type')?.value === 'RESILIATION') {
+            <div class="form-group">
+              <label for="abonnementId">
+                <i class="fas fa-sim-card"></i> Abonnement concerné *
+              </label>
+              <select 
+                id="abonnementId" 
+                formControlName="abonnementId" 
+                class="form-control"
+                [class.is-invalid]="demandeForm.get('abonnementId')?.invalid && demandeForm.get('abonnementId')?.touched">
+                <option value="">Sélectionnez un abonnement</option>
+                @for (abonnement of mesAbonnements; track abonnement.id) {
+                  <option [value]="abonnement.id">
+                    {{ abonnement.nom }} - {{ abonnement.prix }} DT/mois
+                  </option>
+                }
+              </select>
+              @if (demandeForm.get('abonnementId')?.invalid && demandeForm.get('abonnementId')?.touched) {
+                <div class="invalid-feedback">
+                  La sélection d'un abonnement est requise
+                </div>
+              }
+            </div>
+          }
+          
+          <!-- Champ sélection offre -->
+          @if (demandeForm.get('type')?.value === 'NOUVELLE_SOUSCRIPTION') {
+            <div class="form-group">
+              <label for="offreId">
+                <i class="fas fa-gift"></i> Offre souhaitée *
+              </label>
+              <select 
+                id="offreId" 
+                formControlName="offreId" 
+                class="form-control"
+                [class.is-invalid]="demandeForm.get('offreId')?.invalid && demandeForm.get('offreId')?.touched">
+                <option value="">Sélectionnez une offre</option>
+                @for (offre of offresDisponibles; track offre.id) {
+                  <option [value]="offre.id">
+                    {{ offre.nom }} - {{ offre.vitesse }} - {{ offre.prix }} DT/mois
+                  </option>
+                }
+              </select>
+              @if (demandeForm.get('offreId')?.invalid && demandeForm.get('offreId')?.touched) {
+                <div class="invalid-feedback">
+                  La sélection d'une offre est requise
+                </div>
+              }
+            </div>
+          }
+          
+          <div class="form-group">
+            <label for="description">
+              <i class="fas fa-align-left"></i> Description détaillée *
+            </label>
+            <textarea 
+              id="description" 
+              formControlName="description" 
+              class="form-control"
+              rows="4"
+              placeholder="Décrivez votre demande en détail..."
+              [class.is-invalid]="demandeForm.get('description')?.invalid && demandeForm.get('description')?.touched"></textarea>
+            @if (demandeForm.get('description')?.invalid && demandeForm.get('description')?.touched) {
+              <div class="invalid-feedback">
+                @if (demandeForm.get('description')?.errors?.['required']) {
+                  La description est requise
+                }
+                @if (demandeForm.get('description')?.errors?.['minlength']) {
+                  Minimum 20 caractères
+                }
+              </div>
+            }
+            <div class="form-help">
+              <i class="fas fa-info-circle"></i>
+              Soyez aussi précis que possible pour un traitement rapide
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              type="button" 
+              class="btn-cancel"
+              (click)="showForm = false">
+              Annuler
+            </button>
+            <button 
+              type="submit" 
+              class="btn-submit"
+              [disabled]="demandeForm.invalid || isSubmitting">
+              @if (isSubmitting) {
+                <i class="fas fa-spinner fa-spin"></i>
+                Envoi en cours...
+              } @else {
+                <i class="fas fa-paper-plane"></i>
+                Envoyer la demande
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- Filtres et recherche -->
+    <div class="filters-container">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          [(ngModel)]="termeRecherche" 
+          (ngModelChange)="appliquerFiltres()"
+          placeholder="Rechercher par numéro, titre ou description...">
+      </div>
+      
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label><i class="fas fa-filter"></i> Filtres :</label>
+          <select [(ngModel)]="filtreType" (change)="appliquerFiltres()" class="filter-select">
+            <option value="TOUS">Tous les types</option>
+            @for (type of typesDemande; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+          
+          <select [(ngModel)]="filtreStatut" (change)="appliquerFiltres()" class="filter-select">
+            <option value="TOUS">Tous les statuts</option>
+            @for (statut of statutsDemande; track statut) {
+              <option [value]="statut">{{ statut }}</option>
+            }
+          </select>
+          
+          <select [(ngModel)]="filtrePriorite" (change)="appliquerFiltres()" class="filter-select">
+            <option value="TOUS">Toutes priorités</option>
+            @for (priorite of prioritesDemande; track priorite) {
+              <option [value]="priorite">{{ priorite }}</option>
+            }
+          </select>
+        </div>
+        
+        <button class="btn-reset-filters" (click)="reinitialiserFiltres()">
+          <i class="fas fa-redo"></i>
+          Réinitialiser
+        </button>
+      </div>
+    </div>
+
+    <!-- Liste des demandes -->
+    <div class="requests-list-container">
+      <div class="requests-header">
+        <h3>
+          <i class="fas fa-list"></i>
+          Liste des Demandes
+          <span class="badge-count">{{ demandesFiltrees.length }}</span>
+        </h3>
+      </div>
+      
+      @if (isLoading) {
+        <div class="loading-state">
+          <i class="fas fa-spinner fa-spin fa-2x"></i>
+          <p>Chargement des demandes...</p>
+        </div>
+      } @else if (demandesFiltrees.length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-inbox fa-3x"></i>
+          <h4>Aucune demande trouvée</h4>
+          <p>Commencez par créer votre première demande</p>
+          <button class="btn-new-request" (click)="showForm = true">
+            <i class="fas fa-plus"></i>
+            Créer une demande
+          </button>
+        </div>
+      } @else {
+        <div class="requests-list">
+          @for (demande of demandesFiltrees; track demande.id) {
+            <div class="request-card" [class.selected]="demandeSelectionnee?.id === demande.id">
+              <div class="request-header">
+                <div class="request-info">
+                  <div class="request-number">{{ demande.numero }}</div>
+                  <h4 class="request-title">{{ demande.titre }}</h4>
+                  <div class="request-meta">
+                    <span class="request-type">{{ demande.type }}</span>
+                    <span class="request-date">
+                      <i class="far fa-calendar"></i>
+                      {{ formaterDate(demande.dateCreation) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="request-status">
+                  <span 
+                    class="status-badge" 
+                    [class]="'status-' + getStatutColor(demande.statut)">
+                    <i [class]="getStatutIcon(demande.statut)"></i>
+                    {{ demande.statut }}
+                  </span>
+                  <span 
+                    class="priority-badge" 
+                    [class]="'priority-' + getPrioriteColor(demande.priorite)">
+                    {{ demande.priorite }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="request-body">
+                <p class="request-description">{{ demande.description }}</p>
+                <div class="request-details">
+                  <span class="detail-item">
+                    <i class="far fa-user"></i>
+                    {{ demande.createdBy.nom }}
+                  </span>
+                  <span class="detail-item">
+                    <i class="far fa-clock"></i>
+                    {{ calculerDuree(demande) }}
+                  </span>
+                  @if (demande.commentaires.length > 0) {
+                    <span class="detail-item">
+                      <i class="far fa-comment"></i>
+                      {{ demande.commentaires.length }} commentaire(s)
+                    </span>
+                  }
+                </div>
+              </div>
+              
+              <div class="request-actions">
+                <button class="btn-details" (click)="afficherDetails(demande)">
+                  <i class="fas fa-eye"></i>
+                  Détails
+                </button>
+                
+                <!-- Actions administrateur -->
+                @if (isAdmin) {
+                  <div class="admin-actions">
+                    <select 
+                      class="status-select"
+                      (change)="changerStatut(demande, $any($event.target).value)">
+                      <option value="">Changer statut</option>
+                      @for (statut of statutsDemande; track statut) {
+                        <option [value]="statut" [disabled]="statut === demande.statut">
+                          {{ statut }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Panneau de détails -->
+    @if (showDetails && demandeSelectionnee) {
+      <div class="details-panel">
+        <div class="details-header">
+          <h3>
+            <i class="fas fa-file-alt"></i>
+            Détails de la Demande {{ demandeSelectionnee.numero }}
+          </h3>
+          <button class="btn-close-details" (click)="fermerDetails()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="details-content">
+          <!-- Informations générales -->
+          <div class="detail-section">
+            <h4><i class="fas fa-info-circle"></i> Informations Générales</h4>
+            <div class="details-grid">
+              <div class="detail-item">
+                <span class="detail-label">Titre :</span>
+                <span class="detail-value">{{ demandeSelectionnee.titre }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Type :</span>
+                <span class="detail-value">{{ demandeSelectionnee.type }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Statut :</span>
+                <span class="detail-value status-badge" [class]="'status-' + getStatutColor(demandeSelectionnee.statut)">
+                  {{ demandeSelectionnee.statut }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Priorité :</span>
+                <span class="detail-value priority-badge" [class]="'priority-' + getPrioriteColor(demandeSelectionnee.priorite)">
+                  {{ demandeSelectionnee.priorite }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Date création :</span>
+                <span class="detail-value">{{ formaterDate(demandeSelectionnee.dateCreation) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Dernière modification :</span>
+                <span class="detail-value">{{ formaterDate(demandeSelectionnee.dateModification) }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Description -->
+          <div class="detail-section">
+            <h4><i class="fas fa-align-left"></i> Description</h4>
+            <div class="description-box">
+              {{ demandeSelectionnee.description }}
+            </div>
+          </div>
+          
+          <!-- Historique -->
+          <div class="detail-section">
+            <h4><i class="fas fa-history"></i> Historique du Statut</h4>
+            <div class="historique-timeline">
+              @for (historique of demandeSelectionnee.historique; track historique.id) {
+                <div class="timeline-item">
+                  <div class="timeline-icon">
+                    <i [class]="getStatutIcon(historique.nouveauStatut)"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span class="timeline-statut">{{ historique.nouveauStatut }}</span>
+                      <span class="timeline-date">{{ formaterDate(historique.date) }}</span>
+                    </div>
+                    <div class="timeline-body">
+                      <div class="timeline-auteur">
+                        <i class="fas fa-user"></i>
+                        {{ historique.modifiePar.nom }}
+                      </div>
+                      @if (historique.raison) {
+                        <div class="timeline-raison">
+                          <i class="fas fa-comment"></i>
+                          {{ historique.raison }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+          
+          <!-- Commentaires -->
+          <div class="detail-section">
+            <h4><i class="fas fa-comments"></i> Commentaires</h4>
+            <div class="commentaires-list">
+              @if (demandeSelectionnee.commentaires.length === 0) {
+                <div class="no-comments">
+                  <i class="far fa-comment-dots"></i>
+                  <p>Aucun commentaire pour le moment</p>
+                </div>
+              } @else {
+                @for (commentaire of demandeSelectionnee.commentaires; track commentaire.id) {
+                  <div class="commentaire">
+                    <div class="commentaire-header">
+                      <div class="commentaire-auteur">
+                        <i class="fas fa-user"></i>
+                        {{ commentaire.auteur.nom }}
+                        @if (commentaire.auteur.role === 'ADMIN') {
+                          <span class="badge-admin">Administrateur</span>
+                        }
+                      </div>
+                      <div class="commentaire-date">
+                        {{ formaterDate(commentaire.date) }}
+                      </div>
+                    </div>
+                    <div class="commentaire-contenu">
+                      {{ commentaire.contenu }}
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+            
+            <!-- Formulaire d'ajout de commentaire -->
+            <form [formGroup]="commentaireForm" (ngSubmit)="ajouterCommentaire()" class="commentaire-form">
+              <textarea 
+                formControlName="commentaire" 
+                class="form-control"
+                placeholder="Ajouter un commentaire..."
+                rows="3"></textarea>
+              <div class="commentaire-actions">
+                <button 
+                  type="submit" 
+                  class="btn-add-comment"
+                  [disabled]="commentaireForm.invalid">
+                  <i class="fas fa-paper-plane"></i>
+                  Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

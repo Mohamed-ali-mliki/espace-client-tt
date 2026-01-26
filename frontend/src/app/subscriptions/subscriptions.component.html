@@ -1,1 +1,269 @@
-<p>subscriptions works!</p>
+<div class="subscriptions-page">
+  <div class="subscriptions-container">
+    
+    <!-- En-tête de la page -->
+    <div class="page-header">
+      <h1>Mes Abonnements Tunisie Telecom</h1>
+      <p class="page-description">
+        Consultez et gérez vos abonnements Internet, Mobile et Fixe
+      </p>
+    </div>
+
+    <!-- Section 1 : Résumé des abonnements -->
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="summary-icon">
+          <i class="fas fa-list-alt"></i>
+        </div>
+        <div class="summary-content">
+          <div class="summary-number">{{ statistiques.totalAbonnements }}</div>
+          <div class="summary-label">Abonnements actifs</div>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="summary-content">
+          <div class="summary-number">{{ statistiques.depenseMensuelle }} DT</div>
+          <div class="summary-label">Dépense mensuelle</div>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="summary-content">
+          <div class="summary-date">{{ statistiques.prochainRenouvellement }}</div>
+          <div class="summary-label">Prochain renouvellement</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2 : Mes abonnements actuels -->
+    <div class="section-container">
+      <div class="section-header">
+        <h2><i class="fas fa-user-check"></i> Mes Abonnements Actuels</h2>
+        <span class="badge">{{ mesAbonnements.length }} services</span>
+      </div>
+      
+      <div class="subscriptions-list">
+        @for (abonnement of mesAbonnements; track abonnement.id) {
+          <div class="subscription-card" [class.actif]="abonnement.statut === 'ACTIF'">
+            <div class="subscription-header">
+              <div class="subscription-info">
+                <h3>{{ abonnement.nom }}</h3>
+                <span class="subscription-type">{{ abonnement.type }}</span>
+              </div>
+              <div class="subscription-status" [class]="abonnement.statut.toLowerCase()">
+                {{ abonnement.statut }}
+              </div>
+            </div>
+            
+            <div class="subscription-details">
+              <div class="detail">
+                <span class="label">Prix :</span>
+                <span class="value">{{ abonnement.prix }} DT / mois</span>
+              </div>
+              <div class="detail">
+                <span class="label">Activation :</span>
+                <span class="value">{{ abonnement.dateActivation }}</span>
+              </div>
+              <div class="detail">
+                <span class="label">Renouvellement :</span>
+                <span class="value">{{ abonnement.dateRenouvellement }}</span>
+              </div>
+              @if (abonnement.details) {
+                <div class="detail">
+                  <span class="label">Détails :</span>
+                  <span class="value">
+                    @if (abonnement.details.adresse) {
+                      {{ abonnement.details.adresse }}
+                    }
+                    @if (abonnement.details.numeroTelephone) {
+                      {{ abonnement.details.numeroTelephone }}
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+            
+            <div class="subscription-actions">
+              <button class="btn-modify" (click)="modifierAbonnement(abonnement)">
+                <i class="fas fa-edit"></i> Modifier
+              </button>
+              <button class="btn-details">
+                <i class="fas fa-info-circle"></i> Détails
+              </button>
+              <button class="btn-cancel" (click)="resilierAbonnement(abonnement)">
+                <i class="fas fa-times"></i> Résilier
+              </button>
+            </div>
+          </div>
+        }
+        
+        <!-- Carte pour ajouter un nouvel abonnement -->
+        <div class="subscription-card add-card">
+          <div class="add-content">
+            <i class="fas fa-plus-circle"></i>
+            <h3>Souscrire à un nouveau service</h3>
+            <p>Découvrez nos offres et ajoutez un nouvel abonnement</p>
+            <button class="btn-add">
+              <i class="fas fa-search"></i> Voir les offres
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3 : Catalogue des offres -->
+    <div class="section-container">
+      <div class="section-header">
+        <h2><i class="fas fa-gift"></i> Catalogue des Offres</h2>
+        <p class="section-subtitle">
+          Choisissez l'abonnement qui correspond à vos besoins parmi notre sélection
+        </p>
+      </div>
+
+      <!-- Boutons de filtrage -->
+      <div class="filter-buttons">
+        <button 
+          class="filter-btn" 
+          [class.active]="filtreType === 'tout'"
+          (click)="filtrerOffres('tout')">
+          <i class="fas fa-layer-group"></i> Toutes les offres
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="filtreType === 'ADSL'"
+          (click)="filtrerOffres('ADSL')">
+          <i class="fas fa-wifi"></i> ADSL
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="filtreType === 'FIBRE'"
+          (click)="filtrerOffres('FIBRE')">
+          <i class="fas fa-bolt"></i> Fibre Optique
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="filtreType === 'MOBILE'"
+          (click)="filtrerOffres('MOBILE')">
+          <i class="fas fa-mobile-alt"></i> Mobile
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="filtreType === 'PACK'"
+          (click)="filtrerOffres('PACK')">
+          <i class="fas fa-box"></i> Packs
+        </button>
+      </div>
+
+      <!-- Grille des offres -->
+      <div class="offers-grid">
+        @for (offre of offresFiltrees; track offre.id) {
+          <div class="offer-card" 
+               [class.featured]="offre.miseEnAvant" 
+               [class.popular]="offre.populaire">
+            
+            <!-- Badges -->
+            @if (offre.miseEnAvant) {
+              <div class="offer-badge featured-badge">
+                <i class="fas fa-crown"></i> Recommandé
+              </div>
+            }
+            
+            @if (offre.populaire) {
+              <div class="offer-badge popular-badge">
+                <i class="fas fa-fire"></i> Populaire
+              </div>
+            }
+            
+            @if (offre.promotion) {
+              <div class="offer-badge promotion-badge">
+                <i class="fas fa-tag"></i> {{ offre.promotion.libelle }}
+              </div>
+            }
+
+            <!-- En-tête de l'offre -->
+            <div class="offer-header">
+              <span class="offer-category">{{ offre.categorie }}</span>
+              <span class="offer-type">{{ offre.type }}</span>
+            </div>
+
+            <!-- Nom de l'offre -->
+            <h3 class="offer-title">{{ offre.nom }}</h3>
+            
+            <!-- Vitesse/Débit -->
+            <div class="offer-speed">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>{{ offre.vitesse }}</span>
+            </div>
+
+            <!-- Caractéristiques -->
+            <ul class="offer-features">
+              @for (caracteristique of offre.caracteristiques; track caracteristique) {
+                <li>
+                  <i class="fas fa-check-circle"></i>
+                  {{ caracteristique }}
+                </li>
+              }
+            </ul>
+
+            <!-- Prix -->
+            <div class="offer-price">
+              @if (offre.prixOriginal) {
+                <div class="original-price">
+                  {{ offre.prixOriginal }} DT
+                </div>
+              }
+              <div class="current-price">
+                {{ offre.prix }} DT / mois
+              </div>
+              @if (offre.prixOriginal) {
+                <div class="savings">
+                  Économisez {{ calculerEconomie(offre) }}%
+                </div>
+              }
+            </div>
+
+            <!-- Bouton d'abonnement -->
+            <button class="btn-subscribe" (click)="sAbonner(offre)">
+              <i class="fas fa-shopping-cart"></i>
+              Souscrire maintenant
+            </button>
+
+            <!-- Pied de l'offre -->
+            <div class="offer-footer">
+              <span class="offer-note">
+                <i class="fas fa-info-circle"></i>
+                Sans engagement caché
+              </span>
+              @if (offre.promotion) {
+                <span class="offer-promo">
+                  <i class="fas fa-clock"></i>
+                  Jusqu'au {{ offre.promotion.dateFin }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Section 4 : Assistance -->
+    <div class="assistance-container">
+      <div class="assistance-content">
+        <i class="fas fa-headset"></i>
+        <h3>Besoin d'aide pour choisir ?</h3>
+        <p>Nos conseillers sont à votre disposition pour vous guider vers l'offre la plus adaptée</p>
+        <button class="btn-assistance">
+          <i class="fas fa-phone-alt"></i> Contacter le support
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
