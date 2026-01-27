@@ -1,0 +1,65 @@
+<footer class="footer">
+
+  <div class="footer-container">
+
+    <!-- ===== Branding ===== -->
+    <div class="footer-brand">
+      <div class="brand-header">
+        <img [src]="logoUrl" alt="Tunisie Telecom" class="footer-logo">
+        <h3>Tunisie Telecom</h3>
+      </div>
+
+      <p class="brand-description">
+        Opérateur National des Télécommunications.
+        Votre partenaire de confiance pour tous vos services numériques.
+      </p>
+
+      <div class="contact-box">
+        <p>📞 <strong>Service Client :</strong> {{ contact.phone }}</p>
+        <p>✉️ <strong>Email :</strong> {{ contact.email }}</p>
+      </div>
+    </div>
+
+    <!-- ===== Navigation ===== -->
+    <div class="footer-links">
+      <div class="links-group">
+        <h4>Services</h4>
+        <a *ngFor="let link of navigationLinks"
+           [routerLink]="link.path">
+          {{ link.label }}
+        </a>
+      </div>
+
+      <div class="links-group">
+        <h4>Support</h4>
+        <a *ngFor="let link of supportLinks"
+           [routerLink]="link.path">
+          {{ link.label }}
+        </a>
+      </div>
+
+      <div class="links-group">
+        <h4>À propos</h4>
+        <a routerLink="/about">Qui sommes-nous</a>
+        <a routerLink="/legal">Mentions légales</a>
+        <a routerLink="/privacy">Politique de confidentialité</a>
+        <a routerLink="/terms">Conditions d'utilisation</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== Bottom ===== -->
+  <div class="footer-bottom">
+    <span>© {{ currentYear }} Tunisie Telecom — Tous droits réservés</span>
+
+    <div class="bottom-links">
+      <a routerLink="/cookies">Cookies</a>
+      <span>|</span>
+      <a routerLink="/accessibility">Accessibilité</a>
+      <span>|</span>
+      <a routerLink="/sitemap">Plan du site</a>
+    </div>
+  </div>
+
+</footer>

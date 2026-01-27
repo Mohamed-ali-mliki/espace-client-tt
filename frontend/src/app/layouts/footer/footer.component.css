@@ -1,0 +1,110 @@
+.footer {
+  background: linear-gradient(135deg, #003366, #001f3f);
+  color: #ffffff;
+  font-size: 14px;
+  padding-top: 30px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+/* ===== Branding ===== */
+.footer-brand {
+  flex: 1;
+  min-width: 260px;
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-logo {
+  height: 40px;
+}
+
+.brand-description {
+  margin: 15px 0;
+  opacity: 0.85;
+}
+
+.contact-box {
+  background: rgba(255,255,255,0.08);
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid #00a8ff;
+}
+
+/* ===== Links ===== */
+.footer-links {
+  flex: 2;
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.links-group {
+  min-width: 160px;
+}
+
+.links-group h4 {
+  margin-bottom: 12px;
+  font-size: 15px;
+  border-bottom: 2px solid #00a8ff;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.links-group a {
+  display: block;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: 0.2s;
+}
+
+.links-group a:hover {
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+/* ===== Bottom ===== */
+.footer-bottom {
+  margin-top: 30px;
+  padding: 15px 20px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.bottom-links a {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.bottom-links a:hover {
+  color: #ffffff;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+  }
+
+  .footer-bottom {
+    text-align: center;
+    flex-direction: column;
+  }
+}
