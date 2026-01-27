@@ -1,1 +1,286 @@
-<p>dashboard-admin works!</p>
+
+<div class="dashboard-admin">
+  <!-- En-tête Admin -->
+  <header class="admin-header">
+    <div class="header-left">
+      <h1><i class="fas fa-user-shield"></i> Tableau de Bord Administrateur</h1>
+      <p class="welcome-text">Bienvenue, Administrateur</p>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-export">
+        <i class="fas fa-file-export"></i> Exporter Rapport
+      </button>
+      <button class="btn btn-primary" (click)="creerOffre()">
+        <i class="fas fa-plus"></i> Nouvelle Offre
+      </button>
+    </div>
+  </header>
+  
+  <!-- Statistiques Principales -->
+  <section class="admin-stats-grid">
+    <div class="row">
+      <!-- Carte Clients -->
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-card-primary">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{ stats.totalClients | number }}</h3>
+            <p>Clients Totaux</p>
+            <span class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> 12% ce mois
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Carte Revenus -->
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-card-success">
+          <div class="stat-icon">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{ formatMontant(stats.revenuMensuel) }}</h3>
+            <p>Revenu Mensuel</p>
+            <span class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> 8% vs mois dernier
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Carte Demandes -->
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-card-warning">
+          <div class="stat-icon">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{ stats.demandesEnCours }}</h3>
+            <p>Demandes en Cours</p>
+            <span class="stat-trend negative">
+              <i class="fas fa-arrow-up"></i> 5 nouvelles aujourd'hui
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Carte Satisfaction -->
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-card-info">
+          <div class="stat-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{ stats.satisfaction }}%</h3>
+            <p>Satisfaction Client</p>
+            <span class="stat-trend positive">
+              <i class="fas fa-arrow-up"></i> 2.3% ce trimestre
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Graphiques et Tableaux -->
+  <div class="row admin-content">
+    <!-- Graphique des revenus -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-chart-line"></i> Performance Mensuelle</h3>
+          <select [(ngModel)]="filterDate" class="form-control form-control-sm">
+            <option value="7j">7 derniers jours</option>
+            <option value="30j">30 derniers jours</option>
+            <option value="90j">3 derniers mois</option>
+          </select>
+        </div>
+        <div class="card-body">
+          <!-- Ici viendra le graphique -->
+          <div class="chart-placeholder">
+            <i class="fas fa-chart-bar fa-3x"></i>
+            <p>Graphique des revenus et abonnements</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Demandes Récentes -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-clock"></i> Demandes Récentes</h3>
+          <button class="btn btn-sm btn-outline-primary" (click)="allerVersGestionDemandes()">
+            Toutes <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="demandes-list">
+            <div *ngFor="let demande of demandesRecent" class="demande-item">
+              <div class="demande-header">
+                <span class="demande-numero">{{ demande.numero }}</span>
+                <span class="badge" [ngClass]="{
+                  'badge-warning': demande.statut === 'EN_ATTENTE',
+                  'badge-info': demande.statut === 'EN_COURS',
+                  'badge-success': demande.statut === 'TERMINEE'
+                }">
+                  {{ demande.statut }}
+                </span>
+              </div>
+              <p class="demande-titre">{{ demande.titre }}</p>
+              <div class="demande-footer">
+                <small>{{ demande.createdBy.nom }}</small>
+                <small>{{ demande.dateCreation | date:'short' }}</small>
+              </div>
+            </div>
+            <div *ngIf="demandesRecent.length === 0" class="text-center py-3">
+              <p class="text-muted">Aucune demande récente</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Liste des Clients -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-user-friends"></i> Gestion des Clients</h3>
+          <div class="header-actions">
+            <select [(ngModel)]="filterClientStatut" class="form-control form-control-sm">
+              <option value="TOUS">Tous les statuts</option>
+              <option value="ACTIF">Actifs</option>
+              <option value="INACTIF">Inactifs</option>
+              <option value="BLOQUE">Bloqués</option>
+            </select>
+            <button class="btn btn-sm btn-primary" (click)="allerVersGestionClients()">
+              <i class="fas fa-cog"></i> Gérer
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Client</th>
+                  <th>Email</th>
+                  <th>Téléphone</th>
+                  <th>Date Inscription</th>
+                  <th>Statut</th>
+                  <th>Abonnements</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let client of clientsPagine">
+                  <td>#{{ client.id }}</td>
+                  <td>
+                    <strong>{{ client.prenom }} {{ client.nom }}</strong>
+                    <small class="d-block text-muted">
+                      Dernière connexion: {{ client.derniereConnexion | date:'short' }}
+                    </small>
+                  </td>
+                  <td>{{ client.email }}</td>
+                  <td>{{ client.telephone }}</td>
+                  <td>{{ client.dateInscription | date:'shortDate' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="{
+                      'badge-success': client.statut === 'ACTIF',
+                      'badge-warning': client.statut === 'INACTIF',
+                      'badge-danger': client.statut === 'BLOQUE'
+                    }">
+                      {{ client.statut }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge badge-info">{{ client.abonnementsActifs }}</span>
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-info" (click)="modifierClient(client)">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-outline-warning" (click)="bloquerClient(client.id)">
+                        <i class="fas fa-ban"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" (click)="supprimerClient(client.id)">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="clients.length === 0">
+                  <td colspan="8" class="text-center">Aucun client trouvé</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <!-- Pagination -->
+            <div class="pagination">
+              <button class="btn btn-sm" [disabled]="currentPageClients === 1">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <span>Page {{ currentPageClients }}</span>
+              <button class="btn btn-sm">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Actions Rapides Admin -->
+  <section class="admin-quick-actions mt-4">
+    <h3><i class="fas fa-bolt"></i> Actions Rapides</h3>
+    <div class="row">
+      <div class="col-md-3 col-sm-6">
+        <div class="action-card" (click)="creerOffre()">
+          <div class="action-icon bg-primary">
+            <i class="fas fa-plus-circle"></i>
+          </div>
+          <h4>Nouvelle Offre</h4>
+          <p>Créer un nouvel abonnement</p>
+        </div>
+      </div>
+      
+      <div class="col-md-3 col-sm-6">
+        <div class="action-card" routerLink="/admin/demandes">
+          <div class="action-icon bg-warning">
+            <i class="fas fa-headset"></i>
+          </div>
+          <h4>Support Client</h4>
+          <p>Gérer les demandes de support</p>
+        </div>
+      </div>
+      
+      <div class="col-md-3 col-sm-6">
+        <div class="action-card" routerLink="/admin/rapports">
+          <div class="action-icon bg-success">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <h4>Rapports</h4>
+          <p>Générer des rapports analytiques</p>
+        </div>
+      </div>
+      
+      <div class="col-md-3 col-sm-6">
+        <div class="action-card" routerLink="/admin/parametres">
+          <div class="action-icon bg-info">
+            <i class="fas fa-cogs"></i>
+          </div>
+          <h4>Paramètres</h4>
+          <p>Configurer le système</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
